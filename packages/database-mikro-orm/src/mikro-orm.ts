@@ -107,8 +107,6 @@ export class AccountsMikroOrm<
     password,
     ...otherFields
   }: CreateUser): Promise<string> {
-    console.log('Creating user');
-    console.log(otherFields);
     const user = new this.UserEntity({
       EmailEntity: this.EmailEntity,
       ServiceEntity: this.ServiceEntity,
@@ -146,7 +144,7 @@ export class AccountsMikroOrm<
       })) ??
       new this.ServiceEntity({
         name: serviceName,
-        user: this.em.getReference(User, Number(userId), true),
+        user: this.em.getReference(this.UserEntity, Number(userId), true),
       });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -213,7 +211,7 @@ export class AccountsMikroOrm<
   public async addEmail(userId: string, newEmail: string, verified: boolean): Promise<void> {
     return this.em.persistAndFlush(
       new this.EmailEntity({
-        user: this.em.getReference(User, Number(userId), true),
+        user: this.em.getReference(this.UserEntity, Number(userId), true),
         address: newEmail,
         verified,
       })
@@ -277,7 +275,7 @@ export class AccountsMikroOrm<
     extra?: object
   ): Promise<string> {
     const session = new this.SessionEntity({
-      user: this.em.getReference(User, Number(userId), true),
+      user: this.em.getReference(this.UserEntity, Number(userId), true),
       token,
       userAgent: connection.userAgent,
       ip: connection.ip,
@@ -303,7 +301,7 @@ export class AccountsMikroOrm<
 
   public async invalidateAllSessions(userId: string, excludedSessionIds?: string[]): Promise<void> {
     const sessions = await this.sessionRepository.find({
-      user: this.em.getReference(User, Number(userId), true),
+      user: this.em.getReference(this.UserEntity, Number(userId), true),
       ...(excludedSessionIds?.length && {
         id: { $nin: excludedSessionIds.map((id) => Number(id)) },
       }),
