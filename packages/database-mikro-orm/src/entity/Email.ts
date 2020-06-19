@@ -37,7 +37,7 @@ export const getEmailSchema = ({
 }: {
   UserEntity?: UserCtor;
   abstract?: boolean;
-}) => {
+} = {}) => {
   return new EntitySchema<Email<any>>({
     class: Email,
     abstract,
@@ -45,7 +45,7 @@ export const getEmailSchema = ({
       id: { type: 'number', primary: true },
       user: { reference: 'm:1', wrappedReference: true, type: UserEntity?.name ?? 'User' },
       address: { type: 'string' },
-      verified: { type: 'boolean', default: 0, onCreate: () => false },
+      verified: { type: 'boolean', default: false, onCreate: () => false },
     },
   });
 };

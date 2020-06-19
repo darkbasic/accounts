@@ -6,16 +6,15 @@ import { mergeTypeDefs, mergeResolvers } from '@graphql-toolkit/schema-merging';
 import { AccountsModule } from '@accounts/graphql-api';
 import { AccountsPassword } from '@accounts/password';
 import { AccountsServer } from '@accounts/server';
-import { AccountsMikroOrm, IUser, UserSchema, UserEmail } from '@accounts/mikro-orm';
+import { AccountsMikroOrm, IUser } from '@accounts/mikro-orm';
 import { MikroORM } from 'mikro-orm';
-import config, { ExtendedUser } from './mikro-orm-config';
+import config, { ExtendedUser, ExtendedEmail } from './mikro-orm-config';
 
 export const createAccounts = async () => {
-  console.log(UserSchema({ emailEntity: UserEmail }));
   const tokenSecret = config.password;
   const orm = await MikroORM.init(config);
   const { em } = orm;
-  const db = new AccountsMikroOrm({ em /*userEntity: ExtendedUser*/ });
+  const db = new AccountsMikroOrm({ em, UserEntity: ExtendedUser, EmailEntity: ExtendedEmail });
   const password = new AccountsPassword<IUser>();
   const accountsServer = new AccountsServer(
     {

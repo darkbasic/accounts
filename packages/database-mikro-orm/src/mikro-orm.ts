@@ -4,7 +4,7 @@ import { Email } from './entity/Email';
 import { Service } from './entity/Service';
 import { Session } from './entity/Session';
 import { AccountsMikroOrmOptions } from './types';
-import { EntityRepository, EntityManager } from 'mikro-orm';
+import { EntityRepository, EntityManager, Constructor } from 'mikro-orm';
 import { User as IUser } from '@accounts/types/lib/types/user';
 import { Session as ISession } from '@accounts/types/lib/types/session/session';
 
@@ -27,12 +27,17 @@ const toSession = async (session: Session<any> | null): Promise<ISession | null>
     updatedAt: session.updatedAt.toDateString(),
   };
 
-export class AccountsMikroOrm implements DatabaseInterface {
+export class AccountsMikroOrm<
+  CustomUser extends User<any, any, any>,
+  CustomEmail extends Email<any>,
+  CustomSession extends Session<any>,
+  CustomService extends Service<any>
+> implements DatabaseInterface {
   private em: EntityManager;
-  private UserEntity: typeof User;
-  private EmailEntity: typeof Email;
-  private ServiceEntity: typeof Service;
-  private SessionEntity: typeof Session;
+  private UserEntity: Constructor<CustomUser | User<any, any, any>>;
+  private EmailEntity: Constructor<CustomEmail | Email<any>>;
+  private ServiceEntity: Constructor<CustomService | Service<any>>;
+  private SessionEntity: Constructor<CustomSession | Session<any>>;
   private userRepository: EntityRepository<User<any, any, any>>;
   private emailRepository: EntityRepository<Email<any>>;
   private serviceRepository: EntityRepository<Service<any>>;
@@ -44,7 +49,7 @@ export class AccountsMikroOrm implements DatabaseInterface {
     EmailEntity = Email,
     ServiceEntity = Service,
     SessionEntity = Session,
-  }: AccountsMikroOrmOptions) {
+  }: AccountsMikroOrmOptions<CustomUser, CustomEmail, CustomSession, CustomService>) {
     this.em = em;
     this.UserEntity = UserEntity;
     this.EmailEntity = EmailEntity;
@@ -102,6 +107,8 @@ export class AccountsMikroOrm implements DatabaseInterface {
     password,
     ...otherFields
   }: CreateUser): Promise<string> {
+    console.log('Creating user');
+    console.log(otherFields);
     const user = new this.UserEntity({
       EmailEntity: this.EmailEntity,
       ServiceEntity: this.ServiceEntity,

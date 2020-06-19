@@ -71,7 +71,7 @@ export const getUserSchema = ({
         nullable: true,
       },
       username: { type: 'string', nullable: true },
-      deactivated: { type: 'boolean', default: 0, onCreate: () => false },
+      deactivated: { type: 'boolean', default: false, onCreate: () => false },
       services: {
         reference: '1:m',
         entity: () => ServiceEntity?.name ?? Service.name,

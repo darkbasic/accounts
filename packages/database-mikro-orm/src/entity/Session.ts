@@ -55,7 +55,7 @@ export const getSessionSchema = ({
 }: {
   UserEntity?: UserCtor;
   abstract?: boolean;
-}) => {
+} = {}) => {
   return new EntitySchema<Session<any>>({
     class: Session,
     abstract,

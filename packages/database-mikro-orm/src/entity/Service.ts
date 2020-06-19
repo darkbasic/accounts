@@ -41,7 +41,7 @@ export const getServiceSchema = ({
 }: {
   UserEntity?: UserCtor;
   abstract?: boolean;
-}) => {
+} = {}) => {
   return new EntitySchema<Service<any>>({
     class: Service,
     abstract,

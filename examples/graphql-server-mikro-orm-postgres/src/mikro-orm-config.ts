@@ -1,45 +1,52 @@
 import 'reflect-metadata';
 import {
-  UserSchema,
   User,
-  UserConstructor,
-  UserEmail,
-  UserService,
-  UserSession,
-  UserEmailConstructor,
+  UserCtorArgs,
+  getUserSchema,
+  Email,
+  EmailCtorArgs,
+  getEmailSchema,
+  Service,
+  Session,
+  getServiceSchema,
+  getSessionSchema,
 } from '@accounts/mikro-orm';
 import { ReflectMetadataProvider, Entity, Property } from 'mikro-orm';
 
-type ExtendedUserConstructor = UserConstructor & {
+type ExtendedUserCtorArgs = UserCtorArgs & {
   name: string;
   surname: string;
 };
 
 @Entity()
-export class ExtendedUser extends User {
+export class ExtendedUser extends User<
+  ExtendedEmail,
+  Session<ExtendedUser>,
+  Service<ExtendedUser>
+> {
   @Property()
   name: string;
 
   @Property()
   surname: string;
 
-  constructor({ name, surname, ...otherProps }: ExtendedUserConstructor) {
+  constructor({ name, surname, ...otherProps }: ExtendedUserCtorArgs) {
     super(otherProps);
     this.name = name;
     this.surname = surname;
   }
 }
 
-type ExtendedEmailConstructor = UserEmailConstructor & {
+type ExtendedEmailCtorArgs = EmailCtorArgs<ExtendedUser> & {
   randomAttribute: string;
 };
 
 @Entity()
-export class ExtendedEmail extends UserEmail {
+export class ExtendedEmail extends Email<ExtendedUser> {
   @Property()
   randomAttribute: string;
 
-  constructor({ randomAttribute, ...otherProps }: ExtendedEmailConstructor) {
+  constructor({ randomAttribute, ...otherProps }: ExtendedEmailCtorArgs) {
     super(otherProps);
     this.randomAttribute = randomAttribute;
   }
@@ -49,11 +56,12 @@ export default {
   metadataProvider: ReflectMetadataProvider,
   cache: { enabled: false },
   entities: [
-    //ExtendedUser,
-    UserSchema({ emailEntity: UserEmail }),
-    UserEmail,
-    UserService,
-    UserSession,
+    ExtendedUser,
+    getUserSchema({ EmailEntity: ExtendedEmail, abstract: true }),
+    ExtendedEmail,
+    getEmailSchema({ UserEntity: ExtendedUser, abstract: true }),
+    getServiceSchema({ UserEntity: ExtendedUser }),
+    getSessionSchema({ UserEntity: ExtendedUser }),
   ],
   dbName: 'accounts',
   user: 'postgres',
