@@ -1,8 +1,8 @@
 import { ConnectionInformations, CreateUser, DatabaseInterface } from '@accounts/types';
 import { User } from './entity/User';
-import { UserEmail } from './entity/UserEmail';
-import { UserService } from './entity/UserService';
-import { UserSession } from './entity/UserSession';
+import { Email } from './entity/Email';
+import { Service } from './entity/Service';
+import { Session } from './entity/Session';
 import { AccountsMikroOrmOptions } from './types';
 import { EntityRepository, EntityManager } from 'mikro-orm';
 import { User as IUser } from '@accounts/types/lib/types/user';
@@ -11,14 +11,14 @@ import { Session as ISession } from '@accounts/types/lib/types/session/session';
 const hasPassword = (opt: object): opt is { bcrypt: string } =>
   !!(opt as { bcrypt: string }).bcrypt;
 
-const toUser = async (user: User | null): Promise<IUser | null> =>
+const toUser = async (user: User<any, any, any> | null): Promise<IUser | null> =>
   user && {
     ...user,
     id: String(user.id),
     emails: await user.emails.loadItems(),
   };
 
-const toSession = async (session: UserSession | null): Promise<ISession | null> =>
+const toSession = async (session: Session<any, any> | null): Promise<ISession | null> =>
   session && {
     ...session,
     id: String(session.id),
@@ -29,31 +29,31 @@ const toSession = async (session: UserSession | null): Promise<ISession | null> 
 
 export class AccountsMikroOrm implements DatabaseInterface {
   private em: EntityManager;
-  private userEntity: typeof User;
-  private userEmailEntity: typeof UserEmail;
-  private userServiceEntity: typeof UserService;
-  private userSessionEntity: typeof UserSession;
-  private userRepository: EntityRepository<User>;
-  private emailRepository: EntityRepository<UserEmail>;
-  private serviceRepository: EntityRepository<UserService>;
-  private sessionRepository: EntityRepository<UserSession>;
+  private UserEntity: typeof User;
+  private EmailEntity: typeof Email;
+  private ServiceEntity: typeof Service;
+  private SessionEntity: typeof Session;
+  private userRepository: EntityRepository<User<any, any, any>>;
+  private emailRepository: EntityRepository<Email<any, any>>;
+  private serviceRepository: EntityRepository<Service<any, any>>;
+  private sessionRepository: EntityRepository<Session<any, any>>;
 
   constructor({
     em,
-    userEntity = User,
-    userEmailEntity = UserEmail,
-    userServiceEntity = UserService,
-    userSessionEntity = UserSession,
+    UserEntity = User,
+    EmailEntity = Email,
+    ServiceEntity = Service,
+    SessionEntity = Session,
   }: AccountsMikroOrmOptions) {
     this.em = em;
-    this.userEntity = userEntity;
-    this.userEmailEntity = userEmailEntity;
-    this.userServiceEntity = userServiceEntity;
-    this.userSessionEntity = userSessionEntity;
-    this.userRepository = this.em.getRepository(this.userEntity);
-    this.emailRepository = this.em.getRepository(this.userEmailEntity);
-    this.serviceRepository = this.em.getRepository(this.userServiceEntity);
-    this.sessionRepository = this.em.getRepository(this.userSessionEntity);
+    this.UserEntity = UserEntity;
+    this.EmailEntity = EmailEntity;
+    this.ServiceEntity = ServiceEntity;
+    this.SessionEntity = SessionEntity;
+    this.userRepository = this.em.getRepository(this.UserEntity);
+    this.emailRepository = this.em.getRepository(this.EmailEntity);
+    this.serviceRepository = this.em.getRepository(this.ServiceEntity);
+    this.sessionRepository = this.em.getRepository(this.SessionEntity);
   }
 
   public async findUserByEmail(email: string): Promise<IUser | null> {
@@ -102,9 +102,9 @@ export class AccountsMikroOrm implements DatabaseInterface {
     password,
     ...otherFields
   }: CreateUser): Promise<string> {
-    const user = new this.userEntity({
-      userEmailEntity: this.userEmailEntity,
-      userServiceEntity: this.userServiceEntity,
+    const user = new this.UserEntity({
+      EmailEntity: this.EmailEntity,
+      ServiceEntity: this.ServiceEntity,
       email,
       password,
       username,
@@ -137,7 +137,7 @@ export class AccountsMikroOrm implements DatabaseInterface {
         name: serviceName,
         user: Number(userId),
       })) ??
-      new this.userServiceEntity({
+      new this.ServiceEntity({
         name: serviceName,
         user: this.em.getReference(User, Number(userId), true),
       });
@@ -205,7 +205,7 @@ export class AccountsMikroOrm implements DatabaseInterface {
 
   public async addEmail(userId: string, newEmail: string, verified: boolean): Promise<void> {
     return this.em.persistAndFlush(
-      new this.userEmailEntity({
+      new this.EmailEntity({
         user: this.em.getReference(User, Number(userId), true),
         address: newEmail,
         verified,
@@ -269,7 +269,7 @@ export class AccountsMikroOrm implements DatabaseInterface {
     connection: ConnectionInformations = {},
     extra?: object
   ): Promise<string> {
-    const session = new this.userSessionEntity({
+    const session = new this.SessionEntity({
       user: this.em.getReference(User, Number(userId), true),
       token,
       userAgent: connection.userAgent,

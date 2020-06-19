@@ -1,13 +1,13 @@
 import { User } from '../entity/User';
-import { UserEmail } from '../entity/UserEmail';
-import { UserService } from '../entity/UserService';
-import { UserSession } from '../entity/UserSession';
+import { Email } from '../entity/Email';
+import { Service } from '../entity/Service';
+import { Session } from '../entity/Session';
 import { EntityManager } from 'mikro-orm';
 
 export interface AccountsMikroOrmOptions {
   em: EntityManager;
-  userEntity?: typeof User;
-  userServiceEntity?: typeof UserService;
-  userEmailEntity?: typeof UserEmail;
-  userSessionEntity?: typeof UserSession;
+  UserEntity?: typeof User;
+  ServiceEntity?: typeof Service;
+  EmailEntity?: typeof Email;
+  SessionEntity?: typeof Session;
 }
