@@ -13,6 +13,10 @@ import config, { ExtendedUser, ExtendedEmail } from './mikro-orm-config';
 export const createAccounts = async () => {
   const tokenSecret = config.password;
   const orm = await MikroORM.init(config);
+  const metadata = orm.getMetadata();
+  //console.log(metadata['metadata']);
+  //console.log(metadata['metadata'].ExtendedUser);
+  console.log(metadata['metadata'].ExtendedUser.properties);
   const { em } = orm;
   const db = new AccountsMikroOrm({ em, UserEntity: ExtendedUser, EmailEntity: ExtendedEmail });
   const password = new AccountsPassword<IUser>();

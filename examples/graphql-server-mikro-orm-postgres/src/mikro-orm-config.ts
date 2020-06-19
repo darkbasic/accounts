@@ -14,8 +14,8 @@ import {
 import { ReflectMetadataProvider, Entity, Property } from 'mikro-orm';
 
 type ExtendedUserCtorArgs = UserCtorArgs & {
-  name: string;
-  surname: string;
+  name?: string;
+  surname?: string;
 };
 
 @Entity()
@@ -24,31 +24,37 @@ export class ExtendedUser extends User<
   Session<ExtendedUser>,
   Service<ExtendedUser>
 > {
-  @Property()
-  name: string;
+  @Property({ nullable: true })
+  name?: string;
 
-  @Property()
-  surname: string;
+  @Property({ nullable: true })
+  surname?: string;
 
   constructor({ name, surname, ...otherProps }: ExtendedUserCtorArgs) {
     super(otherProps);
-    this.name = name;
-    this.surname = surname;
+    if (name) {
+      this.name = name;
+    }
+    if (surname) {
+      this.surname = surname;
+    }
   }
 }
 
 type ExtendedEmailCtorArgs = EmailCtorArgs<ExtendedUser> & {
-  randomAttribute: string;
+  randomAttribute?: string;
 };
 
 @Entity()
 export class ExtendedEmail extends Email<ExtendedUser> {
-  @Property()
-  randomAttribute: string;
+  @Property({ nullable: true })
+  randomAttribute?: string;
 
   constructor({ randomAttribute, ...otherProps }: ExtendedEmailCtorArgs) {
     super(otherProps);
-    this.randomAttribute = randomAttribute;
+    if (randomAttribute) {
+      this.randomAttribute = randomAttribute;
+    }
   }
 }
 
