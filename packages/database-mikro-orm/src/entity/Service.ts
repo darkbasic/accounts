@@ -1,5 +1,5 @@
-import { IdentifiedReference, Reference } from 'mikro-orm';
-import { User } from './User';
+import { IdentifiedReference, Reference, EntitySchema } from 'mikro-orm';
+import { User, UserCtor } from './User';
 
 export class Service<CustomUser extends User<any, any, any>> {
   id!: number;
@@ -35,32 +35,22 @@ export type ServiceCtor<CustomUser extends User<any, any, any>> = new (
   args: ServiceCtorArgs<CustomUser>
 ) => Service<CustomUser>;
 
-/*@Entity()
-export class UserService {
-  @PrimaryKey()
-  id!: number;
-
-  @ManyToOne(() => User, { wrappedReference: true })
-  user!: IdentifiedReference<User>;
-
-  @Property()
-  name: string;
-
-  @Property({ nullable: true })
-  token?: string;
-
-  @Property({ type: 'json', nullable: true })
-  options?: object;
-
-  constructor({ name, user, password }: ServiceCtorArgs) {
-    this.name = name;
-
-    if (user) {
-      this.user = Reference.create(user);
-    }
-
-    if (password) {
-      this.options = { bcrypt: password };
-    }
-  }
-}*/
+export const getServiceSchema = ({
+  UserEntity,
+  abstract = false,
+}: {
+  UserEntity?: UserCtor;
+  abstract?: boolean;
+}) => {
+  return new EntitySchema<Service<any>>({
+    class: Service,
+    abstract,
+    properties: {
+      id: { type: 'number', primary: true },
+      user: { reference: 'm:1', wrappedReference: true, type: UserEntity?.name ?? 'User' },
+      name: { type: 'string' },
+      token: { type: 'string', nullable: true },
+      options: { type: 'json', nullable: true },
+    },
+  });
+};
