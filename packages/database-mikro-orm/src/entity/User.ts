@@ -4,19 +4,19 @@ import { Email, EmailCtor } from './Email';
 import { Session } from './Session';
 
 export class User<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
+  CustomEmail extends Email<any>,
+  CustomSession extends Session<any>,
+  CustomService extends Service<any>
 > {
   id!: number;
 
   username?: string;
 
-  services = new Collection<CustomService | Service<CustomEmail, CustomSession>>(this);
+  services = new Collection<CustomService | Service<any>>(this);
 
-  emails = new Collection<CustomEmail | Email<CustomSession, CustomService>>(this);
+  emails = new Collection<CustomEmail | Email<any>>(this);
 
-  sessions = new Collection<CustomSession | Session<CustomEmail, CustomService>>(this);
+  sessions = new Collection<CustomSession | Session<any>>(this);
 
   deactivated = false;
 
@@ -24,19 +24,7 @@ export class User<
 
   updatedAt = new Date();
 
-  constructor({
-    EmailEntity,
-    ServiceEntity,
-    email,
-    password,
-    username,
-  }: {
-    EmailEntity: EmailCtor<CustomEmail, CustomSession, CustomService>;
-    ServiceEntity: ServiceCtor<CustomEmail, CustomSession, CustomService>;
-    email?: string;
-    password?: string;
-    username?: string;
-  }) {
+  constructor({ EmailEntity, ServiceEntity, email, password, username }: UserCtorArgs) {
     if (username) {
       this.username = username;
     }
@@ -49,27 +37,15 @@ export class User<
   }
 }
 
-/*export interface UserCtorArgs<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> {
-  EmailEntity: EmailCtor<CustomEmail, CustomSession, CustomService>;
-  ServiceEntity: ServiceCtor<CustomEmail, CustomSession, CustomService>;
+export interface UserCtorArgs {
+  EmailEntity: EmailCtor<any>;
+  ServiceEntity: ServiceCtor<any>;
   email?: string;
   password?: string;
   username?: string;
 }
 
-export type UserCtor<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> = new (args: UserCtorArgs<CustomEmail, CustomSession, CustomService>) => User<
-  CustomEmail,
-  CustomSession,
-  CustomService
->;*/
+export type UserCtor = new (args: UserCtorArgs) => User<any, any, any>;
 
 /*export const getUserSchema = <
   CustomEmail extends Email<CustomSession, CustomService>,

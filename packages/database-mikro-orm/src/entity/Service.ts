@@ -1,15 +1,10 @@
 import { IdentifiedReference, Reference } from 'mikro-orm';
 import { User } from './User';
-import { Session } from './Session';
-import { Email } from './Email';
 
-export class Service<
-  CustomEmail extends Email<CustomSession, this>,
-  CustomSession extends Session<CustomEmail, this>
-> {
+export class Service<CustomUser extends User<any, any, any>> {
   id!: number;
 
-  user!: IdentifiedReference<User<CustomEmail, CustomSession, this>>;
+  user!: IdentifiedReference<CustomUser>;
 
   name: string;
 
@@ -17,15 +12,7 @@ export class Service<
 
   options?: object;
 
-  constructor({
-    name,
-    user,
-    password,
-  }: {
-    name: string;
-    user?: User<CustomEmail, CustomSession, this>;
-    password?: string;
-  }) {
+  constructor({ name, user, password }: ServiceCtorArgs<CustomUser>) {
     this.name = name;
 
     if (user) {
@@ -38,24 +25,15 @@ export class Service<
   }
 }
 
-export type ServiceCtorArgs<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> = {
+export type ServiceCtorArgs<CustomUser extends User<any, any, any>> = {
   name: string;
-  user?: User<CustomEmail, CustomSession, CustomService>;
+  user?: CustomUser;
   password?: string;
 };
 
-export type ServiceCtor<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> = new (args: ServiceCtorArgs<CustomEmail, CustomSession, CustomService>) => Service<
-  CustomEmail,
-  CustomSession
->;
+export type ServiceCtor<CustomUser extends User<any, any, any>> = new (
+  args: ServiceCtorArgs<CustomUser>
+) => Service<CustomUser>;
 
 /*@Entity()
 export class UserService {

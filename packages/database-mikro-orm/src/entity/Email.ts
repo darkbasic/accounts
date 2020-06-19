@@ -1,29 +1,16 @@
 import { IdentifiedReference, Reference } from 'mikro-orm';
 import { User } from './User';
-import { Session } from './Session';
-import { Service } from './Service';
 
-export class Email<
-  CustomSession extends Session<this, CustomService>,
-  CustomService extends Service<this, CustomSession>
-> {
+export class Email<CustomUser extends User<any, any, any>> {
   id!: number;
 
-  user!: IdentifiedReference<User<this, CustomSession, CustomService>>;
+  user!: IdentifiedReference<CustomUser>;
 
   address: string;
 
   verified = false;
 
-  constructor({
-    address,
-    user,
-    verified,
-  }: {
-    address: string;
-    user?: User<this, CustomSession, CustomService>;
-    verified?: boolean;
-  }) {
+  constructor({ address, user, verified }: EmailCtorArgs<CustomUser>) {
     this.address = address.toLocaleLowerCase();
     if (user) {
       this.user = Reference.create(user);
@@ -34,24 +21,15 @@ export class Email<
   }
 }
 
-export interface EmailCtorArgs<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> {
+export interface EmailCtorArgs<CustomUser extends User<any, any, any>> {
   address: string;
-  user?: User<CustomEmail, CustomSession, CustomService>;
+  user?: CustomUser;
   verified?: boolean;
 }
 
-export type EmailCtor<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> = new (args: EmailCtorArgs<CustomEmail, CustomSession, CustomService>) => Email<
-  CustomSession,
-  CustomService
->;
+export type EmailCtor<CustomUser extends User<any, any, any>> = new (
+  args: EmailCtorArgs<CustomUser>
+) => Email<CustomUser>;
 
 /*export const getEmail = <
   CustomSession extends Session,

@@ -1,19 +1,14 @@
 import { IdentifiedReference, Reference } from 'mikro-orm';
 import { User } from './User';
-import { Service } from './Service';
-import { Email } from './Email';
 
-export class Session<
-  CustomEmail extends Email<this, CustomService>,
-  CustomService extends Service<CustomEmail, this>
-> {
+export class Session<CustomUser extends User<any, any, any>> {
   id!: number;
 
   createdAt: Date = new Date();
 
   updatedAt: Date = new Date();
 
-  user: IdentifiedReference<User<CustomEmail, this, CustomService>>;
+  user: IdentifiedReference<CustomUser>;
 
   token: string;
 
@@ -25,21 +20,7 @@ export class Session<
 
   extra?: object;
 
-  constructor({
-    user,
-    token,
-    valid,
-    userAgent,
-    ip,
-    extra,
-  }: {
-    user: User<CustomEmail, this, CustomService>;
-    token: string;
-    valid: boolean;
-    userAgent?: string | null;
-    ip?: string | null;
-    extra?: object;
-  }) {
+  constructor({ user, token, valid, userAgent, ip, extra }: SessionCtorArgs<CustomUser>) {
     this.user = Reference.create(user);
     this.token = token;
     this.valid = valid;
@@ -55,12 +36,8 @@ export class Session<
   }
 }
 
-/*export type SessionCtorArgs<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> = {
-  user: User<CustomEmail, CustomSession, CustomService>;
+export type SessionCtorArgs<CustomUser extends User<any, any, any>> = {
+  user: CustomUser;
   token: string;
   valid: boolean;
   userAgent?: string | null;
@@ -68,14 +45,9 @@ export class Session<
   extra?: object;
 };
 
-export type SessionCtor<
-  CustomEmail extends Email<CustomSession, CustomService>,
-  CustomSession extends Session<CustomEmail, CustomService>,
-  CustomService extends Service<CustomEmail, CustomSession>
-> = new (args: SessionCtorArgs<CustomEmail, CustomSession, CustomService>) => Session<
-  CustomEmail,
-  CustomService
->;*/
+export type SessionCtor<CustomUser extends User<any, any, any>> = new (
+  args: SessionCtorArgs<CustomUser>
+) => Session<CustomUser>;
 
 /*@Entity()
 export class UserSession {

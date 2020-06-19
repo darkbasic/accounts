@@ -18,7 +18,7 @@ const toUser = async (user: User<any, any, any> | null): Promise<IUser | null> =
     emails: await user.emails.loadItems(),
   };
 
-const toSession = async (session: Session<any, any> | null): Promise<ISession | null> =>
+const toSession = async (session: Session<any> | null): Promise<ISession | null> =>
   session && {
     ...session,
     id: String(session.id),
@@ -34,9 +34,9 @@ export class AccountsMikroOrm implements DatabaseInterface {
   private ServiceEntity: typeof Service;
   private SessionEntity: typeof Session;
   private userRepository: EntityRepository<User<any, any, any>>;
-  private emailRepository: EntityRepository<Email<any, any>>;
-  private serviceRepository: EntityRepository<Service<any, any>>;
-  private sessionRepository: EntityRepository<Session<any, any>>;
+  private emailRepository: EntityRepository<Email<any>>;
+  private serviceRepository: EntityRepository<Service<any>>;
+  private sessionRepository: EntityRepository<Session<any>>;
 
   constructor({
     em,
